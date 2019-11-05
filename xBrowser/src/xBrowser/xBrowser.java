@@ -95,6 +95,9 @@ implements HyperlinkListener {
             BorderLayout.CENTER);
 	}
 	
+	private void exitBrowser() {
+        System.exit(0);
+    }
 	
 	
 	
