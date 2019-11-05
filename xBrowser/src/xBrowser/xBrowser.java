@@ -62,7 +62,40 @@ implements HyperlinkListener {
     });
     fwdBtn.setEnabled(false);
     buttonPanel.add(fwdBtn);
+    
+    // Setting up url field
+    urlTextField = new JTextField(40);
+    urlTextField.addKeyListener(new KeyAdapter() {
+        public void keyReleased(KeyEvent e) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                go();
+            }
+        }
+    });
+    buttonPanel.add(urlTextField);
+    
+    // Setting up go button
+    JButton goBtn = new JButton("GO");
+    goBtn.addActionListener(new ActionListener() {
+        public void actionPerformed(ActionEvent e) {
+            go();
+        }
+    });
+    buttonPanel.add(goBtn);
+    
+    // Setting up the display pane
+    displayPane = new JEditorPane();
+    displayPane.setContentType("text/html");
+    displayPane.setEditable(false);
+    displayPane.addHyperlinkListener(this);
+    
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add(buttonPanel, BorderLayout.NORTH);
+    getContentPane().add(new JScrollPane(displayPane),
+            BorderLayout.CENTER);
 	}
+	
+	
 	
 	
 }
