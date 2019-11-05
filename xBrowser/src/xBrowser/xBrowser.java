@@ -99,6 +99,129 @@ implements HyperlinkListener {
         System.exit(0);
     }
 	
+	private void back() {
+        URL currentUrl = displayPane.getPage();
+ 
+        int pageIndex = pages.indexOf(currentUrl.toString());
+        try {
+            showPage(
+                    new URL((String) pages.get(pageIndex - 1)), false);
+        } catch (Exception e) {}
+    }
 	
+	private void forward() {
+        URL currentUrl = displayPane.getPage();
+        int pageIndex = pages.indexOf(currentUrl.toString());
+        try {
+            showPage(
+                    new URL((String) pages.get(pageIndex + 1)), false);
+        } catch (Exception e) {}
+    }
 	
+	private void go() {
+        URL verifiedUrl = verifyUrl(urlTextField.getText());
+        if (verifiedUrl != null) {
+            showPage(verifiedUrl, true);
+        } else {
+            showError("Invalid URL");
+        }
+    }
+	
+	private void showError(String errorMessage) {
+        JOptionPane.showMessageDialog(this, errorMessage,
+                "Error", JOptionPane.ERROR_MESSAGE);
+    }
+	
+	private URL verifyUrl(String url) {
+        // Only allow HTTP URLs.
+        if (!url.toLowerCase().startsWith("http://"))
+            return null;
+         
+        // Verify format of URL.
+        URL verifiedUrl = null;
+        try {
+            verifiedUrl = new URL(url);
+        } catch (Exception e) {
+            return null;
+        }
+         
+        return verifiedUrl;
+    }
+	
+	private void showPage(URL pageUrl, boolean addToList) {
+        // Show hour glass cursor while crawling is under way.
+        setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+         
+        try {
+            // Get URL of page currently being displayed.
+            URL currentUrl = displayPane.getPage();
+             
+            // Load and display specified page.
+            displayPane.setPage(pageUrl);
+             
+            // Get URL of new page being displayed.
+            URL newUrl = displayPane.getPage();
+             
+            // Add page to list if specified.
+            if (addToList) {
+                int listSize = pages.size();
+                if (listSize > 0) {
+                    int pageIndex =
+                            pages.indexOf(currentUrl.toString());
+                    if (pageIndex < listSize - 1) {
+                        for (int i = listSize - 1; i > pageIndex; i--) {
+                            pages.remove(i);
+                        }
+                    }
+                }
+                pages.add(newUrl.toString());
+            }
+             
+            // Update location text field with URL of current page.
+            urlTextField.setText(newUrl.toString());
+             
+            // Update buttons based on the page being displayed.
+            updateButtons();
+        } catch (Exception e) {
+            // Show error messsage.
+            showError("Unable to load page");
+        } finally {
+            // Return to default cursor.
+            setCursor(Cursor.getDefaultCursor());
+        }
+    }
+	
+	private void updateButtons() {
+        if (pages.size() < 2) {
+            backBtn.setEnabled(false);
+            fwdBtn.setEnabled(false);
+        } else {
+            URL currentUrl = displayPane.getPage();
+            int pageIndex = pages.indexOf(currentUrl.toString());
+            backBtn.setEnabled(pageIndex > 0);
+            fwdBtn.setEnabled(
+                    pageIndex < (pages.size() - 1));
+        }
+    }
+	
+	 public void hyperlinkUpdate(HyperlinkEvent event) {
+	        HyperlinkEvent.EventType eventType = event.getEventType();
+	        if (eventType == HyperlinkEvent.EventType.ACTIVATED) {
+	            if (event instanceof HTMLFrameHyperlinkEvent) {
+	                HTMLFrameHyperlinkEvent linkEvent =
+	                        (HTMLFrameHyperlinkEvent) event;
+	                HTMLDocument document =
+	                        (HTMLDocument) displayPane.getDocument();
+	                document.processHTMLFrameHyperlinkEvent(linkEvent);
+	            } else {
+	                showPage(event.getURL(), true);
+	            }
+	        }
+	    }
+	 
+	 public static void main(String[] args) {
+	        xBrowser browser = new xBrowser();
+	        browser.setVisible(true);
+	
+	 }
 }
